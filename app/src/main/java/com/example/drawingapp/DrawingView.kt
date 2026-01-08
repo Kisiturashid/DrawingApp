@@ -34,76 +34,48 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         drawPaint!!.strokeCap = Paint.Cap.ROUND
         canvasPaint = Paint(Paint.DITHER_FLAG)
         brushSize = 20.toFloat()
-        drawPaint!!.isAntiAlias = true
+
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        canvasBitmap = Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_8888)
+        canvas = Canvas(canvasBitmap!!)
+
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        // 1. Draw all previously finished paths
-        for (path in paths) {
-            drawPaint.strokeWidth = path.brushThickness
-            drawPaint.color = path.color
-            canvas.drawPath(path, drawPaint)
-        }
-
-        // 2. Draw the path currently being drawn
-        drawPath?.let {
-            drawPaint.strokeWidth = it.brushThickness
-            drawPaint.color = it.color
-            canvas.drawPath(it, drawPaint)
+        canvas.drawBitmap(canvasBitmap!!,0f,0f, canvasPaint)
+        if(!drawPath!!.isEmpty) {
+            drawPaint!!.strokeWidth = drawPath!!.brushThickness
+            drawPaint!!.color = drawPath!!.color
+            canvas.drawPath(drawPath!!, drawPaint!!)
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val touchX = event.x
-        val touchY = event.y
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val touchX = event?.x
+        val touchY = event?.y
 
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
+        when(event?.action){
+            MotionEvent.ACTION_DOWN -> {drawPath!!.color = color
+            drawPath!!.brushThickness = brushSize
+
+            drawPath!!.reset()
+            drawPath!!.moveTo( touchX!!,touchY!!)
+            }
+            MotionEvent.ACTION_MOVE ->{
+                drawPath!!.lineTo(touchX!!, touchY!!)
+            }
+            MotionEvent.ACTION_UP ->{
                 drawPath = CustomPath(color, brushSize)
-                drawPath?.moveTo(touchX, touchY)
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                drawPath?.lineTo(touchX, touchY)
-            }
-
-            MotionEvent.ACTION_UP -> {
-                // Add the finished path to our list and reset
-                drawPath?.let { paths.add(it) }
-                drawPath = null
             }
             else -> return false
         }
+        invalidate()
 
-        invalidate() // Tells the view to redraw
         return true
-    }
-
-    /**
-     * Call this from your Activity/Fragment to change the brush size
-     */
-    fun setSizeForBrush(newSize: Float) {
-        brushSize = newSize
-    }
-
-    /**
-     * Call this from your Activity/Fragment to change color
-     */
-    fun setColor(newColor: Int) {
-        color = newColor
-    }
-
-    /**
-     * Logic to undo the last action
-     */
-    fun onClickUndo() {
-        if (paths.size > 0) {
-            paths.removeAt(paths.size - 1)
-            invalidate()
-        }
     }
 
     // Custom Path class that keeps track of its own color and size
