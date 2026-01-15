@@ -1,5 +1,6 @@
 package com.example.drawingapp
 
+import android.app.Dialog
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         drawingView = findViewById(R.id.drawing_view)
 
+
+    }
+    private fun showBrushSizeChooserDialog(){
+        val brushDialog = Dialog(this)
+       // brushDialog.setContentView(R.layout.brush_size)
+        brushDialog.setTitle("Brush Size: ")
+
+        // val smallBtn = brushDialog.ib_small
 
     }
 }
