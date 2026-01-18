@@ -2,15 +2,18 @@ package com.example.drawingapp
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
-import androidx.activity.enableEdgeToEdge
+import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.core.view.get
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
     private var drawingView: DrawingView? = null
+    private var ImageButtonCurrentPaint: ImageButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,13 +22,15 @@ class MainActivity : AppCompatActivity() {
         val  brush : ImageButton  = findViewById(R.id.ib_brush)
         drawingView?.setSizeForBrush(20.toFloat())
 
+        val linearLayoutPaintColors = findViewById<LinearLayout>(R.id.ll_paint_colors)
+        ImageButtonCurrentPaint = linearLayoutPaintColors[7] as ImageButton
+        ImageButtonCurrentPaint!!.setImageDrawable(
+            ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
+        )
+
         brush.setOnClickListener {
             showBrushSizeChooserDialog()
         }
-
-
-
-
     }
     private fun showBrushSizeChooserDialog(){
         val brushDialog = Dialog(this)
@@ -51,8 +56,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         brushDialog.show()
+    }
 
+    fun paintClicked(view: View){
+        if (view !== ImageButtonCurrentPaint ){
+            val imageButton = view as ImageButton
+            val colorTag =  imageButton.tag.toString()
+            drawingView?.setCoolor(colorTag)
 
+            imageButton!!.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
+            )
+            ImageButtonCurrentPaint?.setImageDrawable(
+                ContextCompat.getDrawable(this, R.drawable.pallet_normal)
+            )
+
+            ImageButtonCurrentPaint = view
+
+        }
 
     }
+
 }
